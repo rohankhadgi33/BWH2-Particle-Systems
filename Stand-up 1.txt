@@ -28,6 +28,7 @@ Who is target client? (anybody, medical worker...)
 Is data from regular people or people with disease related to blood?
 what type of vessel you want to simulate (e.g. arterial, venous, capillary),
 and decide on the type of simulation you want to create (e.g. computational fluid dynamics, mathematical modeling).
+Are we trying to detect any anomalies in blood? Mainly what is the use case of this model?
 
 
 Do we need to make/use a preexisting image processing component so as to take in images of real blood vessels, before turning them into environments for the simulation?
