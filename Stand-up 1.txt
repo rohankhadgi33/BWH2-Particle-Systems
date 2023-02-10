@@ -26,6 +26,9 @@ Current Questions / Problems / Something you need
 How do we get data for the project?
 Who is target client? (anybody, medical worker...)
 Is data from regular people or people with disease related to blood?
+what type of vessel you want to simulate (e.g. arterial, venous, capillary),
+and decide on the type of simulation you want to create (e.g. computational fluid dynamics, mathematical modeling).
+
 
 Do we need to make/use a preexisting image processing component so as to take in images of real blood vessels, before turning them into environments for the simulation?
 If so, could we get examples of these images that we would need to process?
