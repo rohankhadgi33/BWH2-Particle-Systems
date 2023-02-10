@@ -33,7 +33,8 @@ If so, could we get examples of these images that we would need to process?
 What are the parts of a blood vessel that we should know about and keep in mind when designing our simulation?
 Are vessel walls and vessel centerlines the only elements of a blood vessel that affect the simulation, or are bifurcation points relevant to the simulation in some way as well?
 If the vessel centerlines are relevant to the simulations, then how are they calculated?
+What does it means the particle "die when they exit the vessel"? Like the particle will disappear when they're out of the screen?
 
 How do particles travel through blood vessels?
 Do particles only flow one way, or both ways in a blood vessel?
-
+What will we expect the particle react if they get stuck by something?
