@@ -25,3 +25,13 @@ How do we get data for the project?
 Who is target client? (anybody, medical worker...)
 Is data from regular people or people with disease related to blood?
 
+Do we need to make/use a preexisting image processing component so as to take in images of real blood vessels, before turning them into environments for the simulation?
+If so, could we get examples of these images that we would need to process?
+
+What are the parts of a blood vessel that we should know about and keep in mind when designing our simulation?
+Are vessel walls and vessel centerlines the only elements of a blood vessel that affect the simulation, or are bifurcation points relevant to the simulation in some way as well?
+If the vessel centerlines are relevant to the simulations, then how are they calculated?
+
+How do particles travel through blood vessels?
+Do particles only flow one way, or both ways in a blood vessel?
+
