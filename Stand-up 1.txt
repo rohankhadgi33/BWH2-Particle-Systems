@@ -1,0 +1,27 @@
+STANDUP 01 - 2/10/2023 
+
+TEAM BWH-Particle
+
+
+General Update and Intro:
+	Team Leaders: Gabriel Vivas
+	Created Github repo: https://github.com/ThaoLai19/BWH2-Particle-Systems
+	Have all team members' schedule -> Decide to meet after class
+
+
+Draft of Requirements
+	Use a particle system to simulate flow through blood vessels
+		Get a 2D vessel -> Generate 2D distance field
+		Develop 2D particle system interact with distance field
+		Create a user interface allows users drop particles to any point in vessel
+	Technologies: still discussing
+		WebGL, JavaScript
+		Front-end: HTML/JS/CSS
+		Back-end: Python
+
+
+Current Questions / Problems / Something you need
+How do we get data for the project?
+Who is target client? (anybody, medical worker...)
+Is data from regular people or people with disease related to blood?
+
