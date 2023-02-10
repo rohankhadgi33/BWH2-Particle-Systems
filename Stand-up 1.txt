@@ -37,4 +37,5 @@ What does it means the particle "die when they exit the vessel"? Like the partic
 
 How do particles travel through blood vessels?
 Do particles only flow one way, or both ways in a blood vessel?
+Are there any obstacles in the blood vessels besides the vessel walls? If so, what are they?
 What will we expect the particle react if they get stuck by something?
