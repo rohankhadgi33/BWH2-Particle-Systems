@@ -1,0 +1,149 @@
+<html>
+<style>
+    body {
+        background-color: black;
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        font-size: 14px;
+        font-weight: 300;
+        color: white;
+
+    }
+</style>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r112/three.min.js"
+        integrity="sha512-LCquqJq+AA80yA7AnAbSrpcdNSDetqAb387JNrFycCa3NY88NOexDUbIQT6phyjDrfirZ5/ZAU30taHGnjEyww=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        window.onload = function () {
+            var scene = new THREE.Scene();
+            //camera
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(0, 0, 50);
+            scene.add(camera);
+
+            // light 
+            ambientLight = new THREE.AmbientLight();
+            scene.add(ambientLight);
+            light = new THREE.DirectionalLight(0xffffff, 5.0);
+            light.position.set(10, 100, 10);
+            scene.add(light);
+
+            //renderer
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            //create map let particles only move in it
+            var x = new Array(200);
+
+            for (var i = 0; i < x.length; i++) {
+                x[i] = new Array(10);
+                for (var j = 0; j < x[i].length; j++) {
+                    if ((i >= 50 && i < 150) && (j >= 2 && j < 7)) {
+                        x[i][j] = 1;
+                    }
+                    else {
+                        x[i][j] = 0;
+                    }
+                }
+            }
+            console.log(x[59][3]);
+
+            // for (var k = 500; k <= 1500; k++) {
+            //     x[k][k] = 1;
+            // }
+            console.log(x[100][0]);
+
+
+
+            // Create a think line
+            const geometry = new THREE.BoxGeometry(100, 10, 0);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const square = new THREE.Mesh(geometry, material);
+            var geo_wireframe = new THREE.EdgesGeometry(geometry); // or WireframeGeometry
+            var mat_wireframe = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+            var mesh_wireframe = new THREE.LineSegments(geo_wireframe, mat_wireframe);
+            scene.add(mesh_wireframe);
+            mesh_wireframe.position.set(0, 2.5, 0);
+            // scene.add(square);
+
+            //create particles
+            var particleGeometry = new THREE.Geometry();
+            // var positions = []
+            // Create some particles and add them to the geometry
+            for (var i = 0; i < 1; i++) {
+                var position = new THREE.Vector3(
+                    Math.random() * 1,
+                    Math.random() * 1,
+                    // Math.random() * 10,
+                );
+                // Add the position to the particle geometry
+                particleGeometry.vertices.push(position);
+            }
+            // Create a particle material
+            var particleMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 1,
+            });
+            // Create a particle system
+            var particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+
+            // Add the particle system to the scene
+            scene.add(particleSystem);
+
+            // initialize position of particles
+            particleSystem.position.set(-49, 2.5, 0);
+
+            velocity_x = Math.random() * 0.1;
+            velocity_y = Math.random() * 0.1;
+
+            // Create a button and add it to the HTML body
+            // Add an event listener to the button
+            const resetBtn = document.getElementById("reset-btn");
+            resetBtn.addEventListener("click", () => {
+                // Reset the position of the particle system
+                particleSystem.position.set(-49, 2.5, 0);
+                velocity_x = Math.random() * 0.1;
+                velocity_y = Math.random() * 0.1;
+            });
+            // Create a render loop
+            function render() {
+                requestAnimationFrame(render);
+                // particleSystem.rotation.x += 0.01;
+                // particleSystem.rotation.y += 0.01;
+
+                if (particleSystem.position.x <= -50 || particleSystem.position.x >= 50) {
+                    velocity_x = -velocity_x; // bounce back
+
+                }
+                if (particleSystem.position.y >= 6 || particleSystem.position.y <= -2.5) {
+                    velocity_y = -velocity_y; // boundaries
+
+                }
+                // console.log(particleSystem.position.x);
+                // console.log(particleSystem.position.y);
+                particleSystem.position.x += velocity_x; // move the particle at velocity in direction
+                particleSystem.position.y += velocity_y;
+
+                renderer.render(scene, camera);
+            }
+
+
+
+
+
+
+            render();
+            // renderer.render(scene, camera);
+        }
+    </script>
+</head>
+
+<body>
+    <button id="reset-btn">Reset</button>
+</body>
+
+</html>
