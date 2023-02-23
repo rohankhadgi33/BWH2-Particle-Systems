@@ -12,6 +12,7 @@
 </style>
 
 
+
 <head>
 
     <script>
@@ -32,42 +33,41 @@
             var y1 = 100;
             var x2 = 500;
             var y2 = 400;
-            var radius1 = 30;
-            var radius2 = 5;
+            var radius = 25;
+
             var endPoint = { x: x1, y: y1 };
             var startPoint = { x: x2, y: y2 };
 
-            // // Define the dimensions of the 2D array
-            // var width = 1000;
-            // var height = 1000;
+            // Define the dimensions of the 2D array
+            var width = 1000;
+            var height = 1000;
 
-            // // Create a 2D array and initialize all elements to 0
-            // var array2d = new Array(width);
-            // for (var i = 0; i < width; i++) {
-            //     array2d[i] = new Array(height).fill(0);
-            // }
+            // Create a 2D array and initialize all elements to 0
+            var array2d = new Array(width);
+            for (var i = 0; i < width; i++) {
+                array2d[i] = new Array(height).fill(0);
+            }
 
-            // // Loop through all the x and y positions in the 2D array
-            // for (var x = 0; x < width; x++) {
-            //     for (var y = 0; y < height; y++) {
+            // Loop through all the x and y positions in the 2D array
+            for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
 
-            //         // Calculate the dot product of the vectors from the start point to the current position and from the start point to the end point
-            //         var dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+                    // Calculate the dot product of the vectors from the start point to the current position and from the start point to the end point
+                    var dotProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
 
-            //         // Calculate the length of the line segment
-            //         var segmentLength = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+                    // Calculate the length of the line segment
+                    var segmentLength = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 
-            //         // Calculate the distance between the current position and the line segment
-            //         var distanceToLine = Math.abs((x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)) / segmentLength;
+                    // Calculate the distance between the current position and the line segment
+                    var distanceToLine = Math.abs((x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)) / segmentLength;
 
-            //         // If the distance is less than or equal to half the thickness of the line, set the corresponding element in the 2D array to 1
-            //         var thickness = 20; // Adjust this value as needed
-            //         if (distanceToLine <= thickness / 2 && dotProduct >= 0 && dotProduct <= segmentLength ** 2) {
-            //             array2d[x][y] = 1;
-            //         }
-            //     }
-            // }
-
+                    // If the distance is less than or equal to half the thickness of the line, set the corresponding element in the 2D array to 1
+                    var thickness = 20; // Adjust this value as radius of the line segment
+                    if (distanceToLine <= thickness / 2 && dotProduct >= 0 && dotProduct <= segmentLength ** 2) {
+                        array2d[x][y] = 1;
+                    }
+                }
+            }
             // Define a Particle class
             class Particle {
                 constructor(x, y, radius, color) {
@@ -76,10 +76,10 @@
                     this.radius = radius;
                     this.color = color;
                     this.velocity = {
-                        // x: Math.random(),
-                        // y: Math.random()
-                        x: -1.05,
-                        y: -1.05
+                        x: Math.random() * 2 - 1,
+                        y: Math.random() * 2 - 1
+                        // x: -1.05,
+                        // y: -1.05
                     }
 
                 }
@@ -94,44 +94,10 @@
                 update() {
                     this.draw();
 
-                    // Update position
-                    this.x += this.velocity.x;
-                    this.y += this.velocity.y;
+                    // // Update position
+                    // this.x += this.velocity.x;
+                    // this.y += this.velocity.y;
                 }
-
-                inside() {
-
-
-                    // Calculate the distance between the particle and the start and end points of the line segment
-                    var distanceToStart = Math.sqrt((this.x - startPoint.x) ** 2 + (this.y - startPoint.y) ** 2);
-                    var distanceToEnd = Math.sqrt((this.x - endPoint.x) ** 2 + (this.y - endPoint.y) ** 2);
-
-                    // Calculate the length of the line segment
-                    var segmentLength = Math.sqrt((startPoint.x - endPoint.x) ** 2 + (startPoint.y - endPoint.y) ** 2);
-
-                    // Calculate the dot product of the vectors from the start point to the particle and from the start point to the end point
-                    var dotProduct = (this.x - startPoint.x) * (endPoint.x - startPoint.x) + (this.y - startPoint.y) * (endPoint.y - startPoint.y);
-
-                    // Check if the particle is inside the line segment
-                    if (distanceToStart + distanceToEnd <= segmentLength + 1 && dotProduct >= 0 && dotProduct <= segmentLength ** 2) {
-                        // The particle is inside the line segment
-                        console.log('Particle is inside the line segment.');
-                        console.log('X:', this.x, 'Y:', this.y);
-                        // this.velocity.x = - this.velocity.x * Math.random();
-                        // this.velocity.y = - this.velocity.y * Math.random();
-
-                    }
-                    else if (distanceToEnd == 0) {
-                        // The particle exit the line segment then disappear
-                        particles.splice(this.particles);
-                    }
-                    else {
-                        this.velocity.x = - this.velocity.x;
-                        this.velocity.y = - this.velocity.y;
-                        console.log(this.velocity.x, this.velocity.y);
-                    }
-
-                };
             }
 
             // Create a function to generate particles
@@ -164,24 +130,54 @@
                 cvs.beginPath();
                 cvs.moveTo(x1, y1);
                 cvs.lineTo(x2, y2);
-                cvs.lineWidth = radius1;
+                cvs.lineWidth = radius;
                 cvs.strokeStyle = line;
                 cvs.lineCap = 'round';
                 cvs.stroke();
 
-                // // Draw the tapered end of the line segment
-                // var line2 = cvs.createRadialline(x2, y2, 0, x2, y2, radius2);
-                // line2.addColorStop(0, '#FFFFFF');
-                // line2.addColorStop(1, '#000000');
-                // cvs.beginPath();
-                // cvs.arc(x2, y2, radius2, 0, Math.PI * 2);
-                // cvs.fillStyle = line2;
-                // cvs.fill();
+                // draw to see if it successfully map on all 1s
+                // // Loop through the 2D array and draw a rectangle for each cell that is equal to 1
+                // for (var x = 0; x < array2d.length; x++) {
+                //     for (var y = 0; y < array2d[x].length; y++) {
+                //         if (array2d[x][y] == 1) {
+                //             // Calculate the coordinates of the rectangle
+                //             var rectX = x;
+                //             var rectY = y;
+
+                //             // Draw the rectangle
+                //             cvs.fillRect(rectX, rectY, 1, 1);
+                //         }
+                //     }
+                // }
+
 
                 // Update particles
                 for (var i = 0; i < particles.length; i++) {
-                    particles[i].update();
-                    particles[i].inside();
+                    var p = particles[i];
+                    p.x += p.velocity.x;
+                    p.y += p.velocity.y;
+
+                    var xIndex = Math.floor(p.x);
+                    var yIndex = Math.floor(p.y);
+                    // Check if the particle is inside the line segment area
+                    if (array2d[xIndex][yIndex] == 1) {
+                        // p.inside();
+
+                    }
+                    // else if (array2d[100][100]) {
+                    //     p.velocity.x = p.velocity.x;
+                    //     p.velocity.y = p.velocity.y;
+                    // }
+                    else {
+                        // p.velocity.x += -0.01;
+                        // p.velocity.y += -0.01;
+                        p.velocity.x = - p.velocity.x;
+                        p.velocity.y = - p.velocity.y;
+                    }
+
+
+                    p.update();
+
                 }
             }
 
