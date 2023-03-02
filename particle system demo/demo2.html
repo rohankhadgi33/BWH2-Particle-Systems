@@ -34,7 +34,7 @@
             var y1 = 100;
             var x2 = 500;
             var y2 = 400;
-            var radius = 25;
+
 
             var endPoint = { x: x1, y: y1 };
             var startPoint = { x: x2, y: y2 };
@@ -136,7 +136,10 @@
                 mouse.x = event.x - 10;
                 mouse.y = event.y - 10
             });
+            function collision(p) {
 
+
+            }
             // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
@@ -154,7 +157,7 @@
                             let rectY = y;
 
                             // Draw the rectangle
-                            cvs.fillStyle = 'rgba(255, 255, 0)';
+                            cvs.fillStyle = 'rgba(255, 150, 0)';
                             cvs.fillRect(rectX, rectY, 1, 1);
                         }
                     }
@@ -190,7 +193,7 @@
                     else if (array2d[xIndex][yIndex] == 0) {
                         p.velocity.x = - p.velocity.x;
                         p.velocity.y = - p.velocity.y;
-                        console.log(yIndex, xIndex);
+                        // console.log(yIndex, xIndex);
                     }
                     p.update();
                 }
