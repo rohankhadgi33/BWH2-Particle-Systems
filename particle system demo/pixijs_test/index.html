@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+  </head>
+  <body>
+    <script>
+
+        // As of now, to get this to run, run
+        // http-server "C:\Users\gviva\OneDrive\Documents\College Work\CS 410 Work\BWH2-Particle-Systems\particle system demo\pixijs_demo"
+        // in the terminal to get this working
+
+        // This is a test file to see if PixiJS will work with GitHub Pages
+
+      // Create the application helper and add its render target to the page
+      let app = new PIXI.Application({ width: 640, height: 360 });
+      document.body.appendChild(app.view);
+
+      // Create the sprite and add it to the stage
+      let sprite = PIXI.Sprite.from('practice_img.png');
+      app.stage.addChild(sprite);
+
+      // Add a ticker callback to move the sprite back and forth
+      let elapsed = 0.0;
+      app.ticker.add((delta) => {
+        elapsed += delta;
+        sprite.x = 100.0 + Math.cos(elapsed/50.0) * 100.0;
+      });
+    </script>
+  </body>
+</html>
