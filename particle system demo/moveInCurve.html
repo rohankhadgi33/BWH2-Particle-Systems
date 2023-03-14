@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Demo Moving In Curve</title>
+        <style>
+            background
+            { 
+                background-color: white; 
+            }   
+        </style>
+
+        <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  
+        <script>
+            $(function() 
+            {
+                var canvas = document.getElementById("canvas");
+                var cv = canvas.getContext("2d");
+
+                // set starting values
+                var speed = 15;           // moving speed
+                var percent = 0;          // particle begin at the start of line
+                var direction = 1;        // moving to the end of line
+
+                animate();
+
+                function animate() 
+                {
+                    // set the animation position (0-100)
+                    percent = percent + direction; 
+    
+                    if (percent < 0 || percent > 100)   // if particle at the begin or the end of the line -> start to move from the begin
+                    {
+                        percent = 0;
+                        direction = 1;
+                    }
+
+                    drawPath(percent);
+
+                    // request another frame
+                    setTimeout(function() 
+                    {
+                        requestAnimationFrame(animate);
+                    }, 5 * speed);
+                }
+
+
+                // draw the path
+                function drawPath(path)
+                {
+                    // re-draw path
+                    cv.clearRect(0,0,canvas.width,canvas.height);
+                    cv.lineWidth = 2;
+                
+                    // part 1: straight line
+                    cv.beginPath();
+                    cv.moveTo(100, 20);
+                    cv.lineTo(200, 160);
+                    cv.strokeStyle = 'black';
+                    cv.stroke();
+
+                    // part 2: first curve
+                    cv.beginPath();
+                    cv.moveTo(200, 160);
+                    cv.quadraticCurveTo(230, 200, 250, 120);
+                    cv.strokeStyle = 'black';
+                    cv.stroke();
+
+                    // part 3: second curve
+                    cv.beginPath();
+                    cv.moveTo(250,120);
+                    cv.bezierCurveTo(290, -40, 300, 200, 400, 150);
+                    cv.strokeStyle = 'black';
+                    cv.stroke();
+
+                    // part 4: third curve
+                    cv.beginPath();
+                    cv.moveTo(400, 150);
+                    cv.lineTo(500, 90);
+                    cv.strokeStyle = 'black';
+                    cv.stroke();
+
+                    // draw the particle
+                    var xy;
+
+                    if(path < 25)           // first part of the path
+                    {
+                        var percent = path / 24;
+                        xy = getLineXYatPercent({x:100,y:20}, {x:200,y:160}, percent);
+                    }
+                    else if(path < 50)      // second part of the path
+                    {
+                        var percent = (path - 25) / 24;
+                        xy = getQuadraticBezierXYatPercent({x:200,y:160}, {x:230,y:200}, {x:250,y:120}, percent);
+                    }
+                    else if(path < 75)      // third part of the path
+                    {
+                        var percent = (path - 50) / 24;
+                        xy = getCubicBezierXYatPercent({x:250,y:120}, {x:290,y:-40}, {x:300,y:200}, {x:400,y:150}, percent);
+                    }
+                    else                    // lsst part of the path
+                    {
+                        var percent = (path - 75) / 25;
+                        xy = getLineXYatPercent({x:400,y:150}, {x:500,y:90}, percent);
+                    }
+                    drawParticle(xy);
+                }
+
+                // draw particle at xy
+                function drawParticle(point)
+                {   
+                    cv.fillStyle = "red";
+                    cv.strokeStyle = "red";
+                    cv.lineWidth = 1;
+                    cv.beginPath();
+                    cv.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                    cv.fill();
+                    cv.stroke();
+                }
+  
+                // line: percent is 0-1
+                function getLineXYatPercent(start, end, percent) 
+                {
+                    var dx = end.x - start.x;
+                    var dy = end.y - start.y;
+                    var X = start.x + dx * percent;
+                    var Y = start.y + dy * percent;
+                    return({x:X,y:Y});
+                }
+
+                // quadratic bezier: percent is 0-1
+                function getQuadraticBezierXYatPercent(start, control, end, percent) 
+                {
+                    var x = Math.pow(1 - percent, 2) * start.x + 2 * (1 - percent) * percent * control.x + Math.pow(percent, 2) * end.x; 
+                    var y = Math.pow(1 - percent, 2) * start.y + 2 * (1 - percent) * percent * control.y + Math.pow(percent, 2) * end.y; 
+                    return({x:x,y:y});
+                }
+
+                // cubic bezier percent is 0-1
+                function getCubicBezierXYatPercent(start, control1, control2, end, percent)
+                {
+                    var x = cubic(percent, start.x, control1.x, control2.x, end.x);
+                    var y = cubic(percent, start.y, control1.y, control2.y, end.y);
+                    return({x:x,y:y});
+                }
+
+                // cubic helper formula at percent distance
+                function cubic(percent, a, b, c, d) 
+                {
+                    var t2 = percent * percent;
+                    var t3 = t2 * percent;
+                    return a + (-a * 3 + percent * (3 * a - a * percent)) * percent
+                             + (3 * b + percent * (-6 * b + b * 3 * percent)) * percent
+                             + (c * 3 - c * 3 * percent) * t2
+                             + d * t3;
+                }
+            });  
+
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas" width=600 height=300></canvas>
+    </body>
+</html>
