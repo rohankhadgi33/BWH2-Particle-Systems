@@ -11,30 +11,14 @@
 
 <head>
   <script src="particle.js" type="text/javascript"></script>
+  <script src="mouse.js" type="text/javascript"></script>
+  <script src="animate.js" type="text/javascript"></script>
+  <script src="drawmap.js" type="text/javascript"></script>
   <script>
     var THRESHOLD = 0.005;
-    let canvas = document.getElementById("myCanvas");
     let cvs = canvas.getContext("2d");
     let array2d = null;
     let particles = []; // Array to store the particles
-
-    // click to create particles
-    let mouseDown = false;
-    let mouseprev = false;
-    let mouse = { x: undefined, y: undefined };
-
-    canvas.addEventListener('mousedown', function (event) {
-      mouseDown = true;
-    });
-
-    canvas.addEventListener('mouseup', function (event) {
-      mouseDown = false;
-    });
-
-    canvas.addEventListener('mousemove', function (event) {
-      mouse.x = event.x;
-      mouse.y = event.y
-    });
 
     window.onload = function () {
       canvas.width = window.innerWidth;
@@ -51,67 +35,6 @@
       animate();
     }
 
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
-      if (array2d != null) {
-        cvs.clearRect(0, 0, canvas.width, canvas.height);
-        drawMap();
-        mouseClickGenerateParticles();
-
-        // Update particles
-        for (let i = 0; i < particles.length; i++) {
-          let p = particles[i];
-          p.x += p.velocity.x;
-          p.y += p.velocity.y;
-
-          let xIndex = Math.floor(p.x);
-          let yIndex = Math.floor(p.y);
-
-          // Check if the particle is inside the line segment area
-          if (!isInside(xIndex, yIndex)) {
-            p.velocity.x = - p.velocity.x;
-            p.velocity.y = - p.velocity.y;
-            console.log(yIndex, xIndex);
-          }
-          p.update();
-        }
-      }
-    }
-
-    function isInside(x, y) {
-      return array2d[x][y] >= THRESHOLD;
-    }
-
-    // Generates particles on partcles
-    function mouseClickGenerateParticles() {
-      // if mouse click in the line segment, create a brust of particles 
-      if (mouseDown && !mouseprev) {
-        var mouseprev = true;
-        console.log(mouse.x, mouse.y);
-        if (array2d[mouse.x][mouse.y] >= THRESHOLD) {
-          for (let i = 0; i < 5; i++) {
-            let color = 'rgb(' + Math.random() * 255 + ', ' + Math.random() * 255 + ', ' + Math.random() * 255 + ')';
-            particles.push(new Particle(mouse.x, mouse.y, 1, color));
-          }
-        }
-      } else if (!mouseDown && mouseprev) {
-        mouseprev = false;
-      }
-    }
-
-    function drawMap() {
-      // Double forloop to draw
-      for (let x = 0; x < array2d.length; x++) {
-        for (let y = 0; y < array2d[x].length; y++) {
-          if (array2d[x][y] >= THRESHOLD) {
-            // Draw the rectangle
-            cvs.fillStyle = 'rgba(255, 255, 255)';
-            cvs.fillRect(x, y, 1, 1);
-          }
-        }
-      }
-    }
   </script>
 </head>
 
