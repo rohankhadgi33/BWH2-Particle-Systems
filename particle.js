@@ -54,6 +54,9 @@ class Particle {
   }
 }
 
+// isInside() checks if a given spot in the distance field is inside a vessel or not.
+// If the value is >= the threshold, then it is inside a vessel.
+// Otherwise, the current position is not inside a vessel.
 function isInside(x, y) {
   return array2d[x][y] >= THRESHOLD;
 }
