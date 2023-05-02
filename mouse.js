@@ -23,7 +23,7 @@ function mouseClickGenerateParticles() {
     if (mouseDown && !mouseprev) {
         var mouseprev = true;
         console.log(mouse.x, mouse.y);
-        if (array2d[mouse.x][mouse.y] >= THRESHOLD) {
+        if (array[mouse.x][mouse.y] >= THRESHOLD) {
             for (let i = 0; i < 5; i++) {
                 let color = 'rgb(' + Math.random() * 255 + ', ' + Math.random() * 255 + ', ' + Math.random() * 255 + ')';
                 particles.push(new Particle(mouse.x, mouse.y, 1, color));
