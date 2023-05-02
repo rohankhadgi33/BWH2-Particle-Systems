@@ -11,7 +11,7 @@
     }
 }*/
 
-/*function drawMap() {
+function drawMap() {
     // Double forloop to draw
     for (let x = array2d.length - 1; x >= 0 ; x--) {
         for (let y = 0; y < array2d[0].length; y++) {
@@ -24,9 +24,9 @@
             }
         }
     }
-}*/
+}
 
-function drawMap() {  
+/*function drawMap() {  
     const rows = array2d[0].length;
     const cols = array2d.length;
     array = new Array(rows);
@@ -49,4 +49,4 @@ function drawMap() {
             }
         }
     }
-}
+}*/
