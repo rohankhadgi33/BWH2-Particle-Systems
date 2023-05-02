@@ -2,7 +2,7 @@
 <canvas id="myCanvas"></canvas>
 <style>
   body {
-    background-color: navy;
+    background-color: silver;
     margin: 0;
     padding: 0;
     font-family: sans-serif;
@@ -37,7 +37,7 @@
       fetch('distance_field.json')
         .then((response) => response.json())
         .then(data => {
-          array = data;
+          array2d = data;
         });
 
       gradient();
