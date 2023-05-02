@@ -1,7 +1,7 @@
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    if (array != null) {
+    if (array2d != null) {
         cvs.clearRect(0, 0, canvas.width, canvas.height);
         drawMap();
         mouseClickGenerateParticles();
