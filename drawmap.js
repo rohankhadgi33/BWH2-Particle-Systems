@@ -1,4 +1,4 @@
-function drawMap() {
+/*function drawMap() {
     // Double forloop to draw
     for (let x = 0; x < array2d.length; x++) {
         for (let y = 0; y < array2d[x].length; y++) {
@@ -9,7 +9,7 @@ function drawMap() {
             }
         }
     }
-}
+}*/
 
 /*function drawMap() {
     // Double forloop to draw
@@ -26,27 +26,27 @@ function drawMap() {
     }
 }*/
 
-/*function drawMap() {  
-    const rows = array2d[0].length;
-    const cols = array2d.length;
-    array = new Array(rows);
+function drawMap() {  
+    // Rotate array
+      const rows = array1[0].length;
+      const cols = array1.length;
+      array2d = new Array(rows);
     
-    for (let i = 0; i < rows; i++)
-    {
-      array[i] = new Array(cols);
-      for (let j = 0; j < cols; j++)
+      for (let i = 0; i < rows; i++)
       {
-        array[i][j] = array2d[j][i];  
+        array2d[i] = new Array(cols);
+        for (let j = 0; j < cols; j++)
+        {
+          array2d[i][j] = array1[j][i];  
+        }
       }
-    }
     // Double forloop to draw
-    //var n = 10;
-    for (let x = 0; x < array.length; x++) {
-        for (let y = 0; y < array[0].length; y++) {
-            if (array[x][y] >= THRESHOLD) {  
+    for (let x = 0; x < array2d.length; x++) {
+        for (let y = 0; y < array2d[0].length; y++) {
+            if (array2d[x][y] >= THRESHOLD) {  
                 cvs.fillStyle = 'rgba(255, 255, 255)';
                 cvs.fillRect(x, y, 1, 1);
             }
         }
     }
-}*/
+}
