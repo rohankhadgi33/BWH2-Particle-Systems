@@ -1,4 +1,4 @@
-/*function drawMap() {
+function drawMap() {
     // Double forloop to draw
     for (let x = 0; x < array2d.length; x--) {
         for (let y = 0; y < array2d[0].length; y++) {
@@ -9,7 +9,7 @@
             }
         }
     }
-}*/
+}
 
 /*function drawMap() {
     // Double forloop to draw
@@ -26,7 +26,7 @@
     }
 }*/
 
-function drawMap() {  
+/*function drawMap() {  
     const rows = array2d[0].length;
     const cols = array2d.length;
     array = new Array(rows);
@@ -49,4 +49,4 @@ function drawMap() {
             }
         }
     }
-}
+}*/
