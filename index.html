@@ -19,7 +19,7 @@
     var THRESHOLD = 0.005;
     let cvs = canvas.getContext("2d");
     let array2d = null;
-    let array = null;
+    let array1 = null;
     let particles = []; // Array to store the particles
     let gradient2d = [];
 
@@ -37,7 +37,7 @@
       fetch('distance_field.json')
         .then((response) => response.json())
         .then(data => {
-          array2d = data;
+          array1 = data;
         });
       
       gradient();
