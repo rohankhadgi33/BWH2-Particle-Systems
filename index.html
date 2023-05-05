@@ -6,36 +6,207 @@
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+
   }
 </style>
 
 <head>
-  <script src="particle.js" type="text/javascript"></script>
-  <script src="mouse.js" type="text/javascript"></script>
-  <script src="animate.js" type="text/javascript"></script>
-  <script src="drawmap.js" type="text/javascript"></script>
-  <script src="gradient.js" type="text/javascript"></script>
+  <!-- <script language="javascript" type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/p5.js"></script> -->
   <script>
     var THRESHOLD = 0.005;
+    let canvas = document.getElementById("myCanvas");
     let cvs = canvas.getContext("2d");
     let array2d = null;
-    let array1 = null;
+    let array3d = null;
+    let flowField = null; // Add this variable to store the generated flow field
     let particles = []; // Array to store the particles
-    let gradient2d = [];
+
+    // click to create particles
+    let mouseDown = false;
+    let mouseprev = false;
+    let mouse = { x: undefined, y: undefined };
+
+    canvas.addEventListener('mousedown', function (event) {
+      mouseDown = true;
+    });
+
+    canvas.addEventListener('mouseup', function (event) {
+      mouseDown = false;
+    });
+
+    canvas.addEventListener('mousemove', function (event) {
+      mouse.x = event.x;
+      mouse.y = event.y
+    });
 
     window.onload = function () {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      // canvas.width = window.innerWidth;
+      // canvas.height = window.innerHeight;
 
       fetch('distance_field.json')
-        .then((response) => response.json())
+        .then(response => response.json())
         .then(data => {
-          array1 = data;
+          console.log("data: ", data);
+          array2d = data;
+          // Set the canvas dimensions based on the size of the 2D array
+          canvas.width = array2d[0].length;
+          canvas.height = array2d.length;
         });
-      
-      gradient();
-        // Call the animate function to start the animation loop
+
+      fetch('gradient.json')
+        .then(response => response.json())
+        .then(data => {
+          console.log("3dArray: ", data);
+          array3d = data;
+          flowField = createFlowField(array3d); // Initialize the flow field
+        });
+
+      // Call the animate function to start the animation loop
       animate();
+    }
+
+    function createFlowField(threeDArray) {
+      const numRows = threeDArray.length;
+      const numCols = threeDArray[0].length;
+
+      const flowField = new Array(numRows);
+
+      for (let i = 0; i < numRows; i++) {
+        flowField[i] = new Array(numCols);
+      }
+
+      // Use the provided 3D array to set the vector values for each point in the flow field
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const x = threeDArray[i][j][0];
+          const y = threeDArray[i][j][1];
+          const velocity = { x: x, y: y };
+          flowField[i][j] = velocity;
+        }
+      }
+
+      return flowField;
+    }
+
+    function isInside(x, y) {
+      const xIndex = Math.floor(x * (array2d[0].length / canvas.width));
+      const yIndex = Math.floor(y * (array2d.length / canvas.height));
+      return (
+        x >= 0 && y >= 0 &&
+        x < array2d.length &&
+        y < array2d[0].length &&
+        array2d[x][y] >= THRESHOLD
+      );
+    }
+
+
+    // Define a Particle class
+    class Particle {
+      constructor(x, y, radius, color) {
+        let xRange = 1;
+        let yRange = 1;
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.velocity = {
+          x: Math.random() * xRange - xRange / 2,
+          y: Math.random() * yRange - yRange / 2,
+        };
+      }
+
+      draw() {
+        cvs.beginPath();
+        cvs.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        cvs.fillStyle = this.color;
+        cvs.fill();
+      }
+
+      update() {
+        this.draw();
+        // console.log(this.velocity);
+        let xIndex = Math.floor(this.x);
+        let yIndex = Math.floor(this.y);
+        // Change this value to adjust the influence of the flow field
+        const scale = 0.1;
+        const i = Math.floor(this.x / 100);
+        const j = Math.floor(this.y / 100);
+        const flow = flowField[i][j];
+        this.velocity.x += flow.x * scale;
+        this.velocity.y += flow.y * scale;
+        if (!isInside(xIndex, yIndex)) {
+
+          console.log("reverse");
+          this.velocity.x = -this.velocity.x;
+          this.velocity.y = -this.velocity.y;
+        }
+
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+
+        const speedLimit = 2; // Change this value to adjust the maximum speed
+        const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
+        if (speed > speedLimit) {
+          this.velocity.x = (this.velocity.x / speed) * speedLimit;
+          this.velocity.y = (this.velocity.y / speed) * speedLimit;
+        }
+      }
+    }
+
+    // Animation loop
+    function animate() {
+      if (array2d != null && flowField != null) {
+        requestAnimationFrame(animate);
+        cvs.clearRect(0, 0, canvas.width, canvas.height);
+        drawMap();
+        mouseClickGenerateParticles();
+
+        // Update particles
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          p.update();
+        }
+      } else {
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function mouseClickGenerateParticles() {
+      // if mouse click in the line segment, create a burst of particles
+      if (mouseDown && !mouseprev) {
+        mouseprev = true;
+        console.log(mouse.x, mouse.y);
+        if (isInside(mouse.x, mouse.y)) {
+          for (let i = 0; i < 1; i++) {
+            let color =
+              "rgb(" +
+              Math.random() * 255 +
+              ", " +
+              Math.random() * 255 +
+              ", " +
+              Math.random() * 255 +
+              ")";
+            particles.push(new Particle(mouse.x, mouse.y, 1, color));
+          }
+        }
+      } else if (!mouseDown && mouseprev) {
+        mouseprev = false;
+      }
+      // console.log(flowField[462][375][0]);
+    }
+
+    function drawMap() {
+      // Double for loop to draw
+      for (let x = 0; x < array2d.length; x++) {
+        for (let y = 0; y < array2d[x].length; y++) {
+          if (array2d[x][y] >= THRESHOLD) {
+            // Draw the rectangle
+            cvs.fillStyle = "rgba(255, 255, 255)";
+            cvs.fillRect(x, y, 1, 1);
+          }
+        }
+      }
     }
 
   </script>
