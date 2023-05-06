@@ -51,8 +51,10 @@
           console.log("data: ", data);
           array1 = data;
           // Set the canvas dimensions based on the size of the 2D array
-          canvas.width = array1[0].length;
-          canvas.height = array1.length;
+         // canvas.width = array1[0].length;
+         // canvas.height = array1.length;
+          canvas.width = array1.length;
+          canvas.height = array1[0].length;
         });
 
       fetch('gradient.json')
