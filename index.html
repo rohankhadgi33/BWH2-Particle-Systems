@@ -1,5 +1,12 @@
 <html>
 <canvas id="myCanvas"></canvas>
+<div id="controller" style="position: fixed; top: 0; right: 0; padding: 20px; background: #fff;">
+  <label for="velocityX">Velocity X:</label><br>
+  <input type="number" id="velocityX" name="velocityX" value="0.25"><br>
+  <label for="velocityY">Velocity Y:</label><br>
+  <input type="number" id="velocityY" name="velocityY" value="0.25"><br>
+  <button id="setVelocity">Set Velocity</button>
+</div>
 <style>
   body {
     background-color: black;
@@ -11,8 +18,6 @@
 </style>
 
 <head>
-  <!-- <script language="javascript" type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/p5.js"></script> -->
   <script>
     var THRESHOLD = 0.005;
     let canvas = document.getElementById("myCanvas");
@@ -22,6 +27,8 @@
     let array3d = null;
     let flowField = null; // Add this variable to store the generated flow field
     let particles = []; // Array to store the particles
+    // var myParticle.velocity.x = 0;
+    // var myParticle.velocity.y = 0;
 
     // click to create particles
     let mouseDown = false;
@@ -37,8 +44,8 @@
     });
 
     canvas.addEventListener('mousemove', function (event) {
-      mouse.x = event.x;
-      mouse.y = event.y
+      mouse.x = event.clientX;
+      mouse.y = event.clientY
     });
 
     window.onload = function () {
@@ -65,6 +72,29 @@
 
       // Call the animate function to start the animation loop
       animate();
+    }
+
+    function findNeighboringWallPoints(x, y) {
+      //checks eight directions
+      const neighbors = [
+        { x: x - 1, y: y },
+        { x: x + 1, y: y },
+        { x: x, y: y - 1 },
+        { x: x, y: y + 1 },
+        { x: x - 1, y: y - 1 },
+        { x: x + 1, y: y + 1 },
+        { x: x - 1, y: y + 1 },
+        { x: x + 1, y: y - 1 },
+      ];
+
+      const wallPoints = neighbors.filter(pt =>
+        pt.x >= 0 && pt.y >= 0 &&
+        pt.x < array2d.length &&
+        pt.y < array2d[0].length &&
+        array2d[pt.x][pt.y] < THRESHOLD
+      );
+
+      return wallPoints;
     }
 
     function createFlowField(threeDArray) {
@@ -104,16 +134,14 @@
 
     // Define a Particle class
     class Particle {
-      constructor(x, y, radius, color) {
-        let xRange = 1;
-        let yRange = 1;
+      constructor(x, y, radius, color, velocityX, velocityY) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
         this.velocity = {
-          x: Math.random() * xRange - xRange / 2,
-          y: Math.random() * yRange - yRange / 2,
+          x: velocityX,
+          y: velocityY,
         };
       }
 
@@ -126,22 +154,50 @@
 
       update() {
         this.draw();
-        // console.log(this.velocity);
-        let xIndex = Math.floor(this.x);
-        let yIndex = Math.floor(this.y);
+        let xIndex = Math.floor(this.x * (array2d[0].length / canvas.width));
+        let yIndex = Math.floor(this.y * (array2d.length / canvas.height));
+        xIndex = Math.max(0, Math.min(xIndex, flowField.length - 1));
+        yIndex = Math.max(0, Math.min(yIndex, flowField[0].length - 1));
+
+
         // Change this value to adjust the influence of the flow field
-        const scale = 0.1;
-        const i = Math.floor(this.x / 100);
-        const j = Math.floor(this.y / 100);
-        const flow = flowField[i][j];
+        const scale = 0.001;
+        const flow = flowField[xIndex][yIndex];
         this.velocity.x += flow.x * scale;
         this.velocity.y += flow.y * scale;
-        if (!isInside(xIndex, yIndex)) {
 
-          console.log("reverse");
-          this.velocity.x = -this.velocity.x;
-          this.velocity.y = -this.velocity.y;
+        if (!isInside(xIndex, yIndex)) {
+          console.log("collision");
+
+          // Find the neighboring wall points
+          const wallPoints = findNeighboringWallPoints(xIndex, yIndex);
+          if (wallPoints.length < 2) {
+            // Not enough points to calculate a line, so just reverse direction
+            this.velocity.x *= -1;
+            this.velocity.y *= -1;
+          } else {
+            // Calculate the line between the first two wall points
+            const dx = wallPoints[1].x - wallPoints[0].x;
+            const dy = wallPoints[1].y - wallPoints[0].y;
+
+            // Calculate theta
+            const theta = Math.atan2(dy, dx);
+
+            // Calculate reflected velocity
+            const cos2Theta = Math.cos(2 * theta);
+            const sin2Theta = Math.sin(2 * theta);
+            const vx = this.velocity.x * cos2Theta + this.velocity.y * sin2Theta;
+            const vy = this.velocity.x * sin2Theta - this.velocity.y * cos2Theta;
+            this.velocity.x = vx;
+            this.velocity.y = vy;
+
+            // print the reflected angle
+            const reflectedAngle = Math.atan2(this.velocity.y, this.velocity.x) - Math.atan2(dy, dx);
+            console.log("reflected angle: ", reflectedAngle);
+          }
         }
+
+
 
         this.x += this.velocity.x;
         this.y += this.velocity.y;
@@ -188,7 +244,12 @@
               ", " +
               Math.random() * 255 +
               ")";
-            particles.push(new Particle(mouse.x, mouse.y, 1, color));
+            // Get the values of the velocity input fields
+            let velocityX = parseFloat(document.getElementById('velocityX').value);
+            let velocityY = parseFloat(document.getElementById('velocityY').value);
+
+            // Pass the velocity values as arguments when creating a new particle
+            particles.push(new Particle(mouse.x, mouse.y, 1, color, velocityX, velocityY));
           }
         }
       } else if (!mouseDown && mouseprev) {
@@ -198,20 +259,9 @@
     }
 
     function drawMap() {
-      // Double for loop to draw
-      /*for (let x = 0; x < array2d.length; x++) {
-        for (let y = 0; y < array2d[x].length; y++) {
-          if (array2d[x][y] >= THRESHOLD) {
-            // Draw the rectangle
-            cvs.fillStyle = "rgba(255, 255, 255)";
-            cvs.fillRect(x, y, 1, 1);
-          }
-        }
-      }*/
       const rows = array1[0].length;
       const cols = array1.length;
       array2d = new Array(rows);
-    
       for (let i = 0; i < rows; i++)
       {
         array2d[i] = new Array(cols);
@@ -220,16 +270,17 @@
           array2d[i][j] = array1[j][i];  
         }
       }
-    
-    // Double forloop to draw
-    for (let x = 0; x < array2d.length; x++) {
-        for (let y = 0; y < array2d[0].length; y++) {
-            if (array2d[x][y] >= THRESHOLD) {  
-                cvs.fillStyle = 'rgba(255, 255, 255)';
-                cvs.fillRect(x, y, 1, 1);
-            }
+      
+      // Double for loop to draw
+      for (let x = 0; x < array2d.length; x++) {
+        for (let y = 0; y < array2d[x].length; y++) {
+          if (array2d[x][y] >= THRESHOLD) {
+            // Draw the rectangle
+            cvs.fillStyle = "rgba(255, 255, 255)";
+            cvs.fillRect(x, y, 1, 1);
+          }
         }
-    }
+      }
     }
 
   </script>
