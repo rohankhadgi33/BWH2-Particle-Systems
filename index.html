@@ -22,7 +22,7 @@
     var THRESHOLD = 0.005;
     let canvas = document.getElementById("myCanvas");
     let cvs = canvas.getContext("2d");
-   // let array1 = null;
+    let array1 = null;
     let array2d = null;
     let array3d = null;
     let flowField = null; // Add this variable to store the generated flow field
@@ -56,13 +56,10 @@
         .then(response => response.json())
         .then(data => {
           console.log("data: ", data);
-          array2d = data;
-         // array1 = data;
+          array1 = data;
           // Set the canvas dimensions based on the size of the 2D array
-        //  canvas.width = array1[0].length;
-        //  canvas.height = array1.length;
-          canvas.width = array2d[0].length;
-          canvas.height = array2d.length;
+          canvas.width = array1[0].length;
+          canvas.height = array1.length;
         });
 
       fetch('gradient.json')
@@ -216,7 +213,7 @@
 
     // Animation loop
     function animate() {
-      if (array2d != null && flowField != null) {
+      if (array1 != null && flowField != null) {
         requestAnimationFrame(animate);
         cvs.clearRect(0, 0, canvas.width, canvas.height);
         drawMap();
@@ -262,7 +259,7 @@
     }
 
     function drawMap() {
-    /*  const rows = array1[0].length;
+      const rows = array1[0].length;
       const cols = array1.length;
       array2d = new Array(rows);
       for (let i = 0; i < rows; i++)
@@ -272,7 +269,7 @@
         {
           array2d[i][j] = array1[j][i];  
         }
-      }*/
+      }
       
       // Double for loop to draw
       for (let x = 0; x < array2d.length; x++) {
