@@ -9,7 +9,7 @@
 </div>
 <style>
   body {
-    background-color: black;
+    background-color: rgb(0, 0, 0);
     margin: 0;
     padding: 0;
     font-family: sans-serif;
@@ -22,13 +22,11 @@
     var THRESHOLD = 0.005;
     let canvas = document.getElementById("myCanvas");
     let cvs = canvas.getContext("2d");
-    let array1 = null;
+    // let array1 = null;
     let array2d = null;
     let array3d = null;
     let flowField = null; // Add this variable to store the generated flow field
     let particles = []; // Array to store the particles
-    // var myParticle.velocity.x = 0;
-    // var myParticle.velocity.y = 0;
 
     // click to create particles
     let mouseDown = false;
@@ -49,19 +47,22 @@
     });
 
     window.onload = function () {
-      // canvas.width = window.innerWidth;
-      // canvas.height = window.innerHeight;
-
+      // input distance field json file here
       fetch('distance_field.json')
         .then(response => response.json())
         .then(data => {
           console.log("data: ", data);
-          array1 = data;
+          // array2d = data;
           // Set the canvas dimensions based on the size of the 2D array
-          canvas.width = array1[0].length;
-          canvas.height = array1.length;
+          // canvas.width = array2d[0].length;
+          // canvas.height = array2d.length;
+          array2d = data;
+          // Set the canvas dimensions based on the size of the 2D array
+          canvas.width = array2d[0].length;
+          canvas.height = array2d.length;
         });
 
+      // input gradient vectors json file here
       fetch('gradient.json')
         .then(response => response.json())
         .then(data => {
@@ -121,13 +122,10 @@
     }
 
     function isInside(x, y) {
-      const xIndex = Math.floor(x * (array2d[0].length / canvas.width));
-      const yIndex = Math.floor(y * (array2d.length / canvas.height));
+      const xIndex = Math.min(Math.max(Math.floor(x * (array2d[0].length / canvas.width)), 0), array2d[0].length - 1);
+      const yIndex = Math.min(Math.max(Math.floor(y * (array2d.length / canvas.height)), 0), array2d.length - 1);
       return (
-        x >= 0 && y >= 0 &&
-        x < array2d.length &&
-        y < array2d[0].length &&
-        array2d[x][y] >= THRESHOLD
+        array2d[xIndex][yIndex] >= THRESHOLD
       );
     }
 
@@ -143,6 +141,7 @@
           x: velocityX,
           y: velocityY,
         };
+        this.outsideTime = 0;
       }
 
       draw() {
@@ -161,14 +160,14 @@
 
 
         // Change this value to adjust the influence of the flow field
-        const scale = 0.001;
+        const scale = 0.0001;
         const flow = flowField[xIndex][yIndex];
         this.velocity.x += flow.x * scale;
         this.velocity.y += flow.y * scale;
 
         if (!isInside(xIndex, yIndex)) {
           console.log("collision");
-
+          this.outsideTime += 1 / 60; // Adjust the time
           // Find the neighboring wall points
           const wallPoints = findNeighboringWallPoints(xIndex, yIndex);
           if (wallPoints.length < 2) {
@@ -213,7 +212,8 @@
 
     // Animation loop
     function animate() {
-      if (array1 != null && flowField != null) {
+      if (array2d != null && flowField != null) {
+        // if (array1 != null && flowField != null) {
         requestAnimationFrame(animate);
         cvs.clearRect(0, 0, canvas.width, canvas.height);
         drawMap();
@@ -221,9 +221,11 @@
 
         // Update particles
         for (let i = 0; i < particles.length; i++) {
-          let p = particles[i];
-          p.update();
+          particles[i].update();
         }
+
+        // Filter particles to remove those that have been outside for more than 1 / 6 sec
+        particles = particles.filter(particle => particle.outsideTime <= 1 / 6);
       } else {
         requestAnimationFrame(animate);
       }
@@ -259,18 +261,6 @@
     }
 
     function drawMap() {
-      const rows = array1[0].length;
-      const cols = array1.length;
-      array2d = new Array(rows);
-      for (let i = 0; i < rows; i++)
-      {
-        array2d[i] = new Array(cols);
-        for (let j = 0; j < cols; j++)
-        {
-          array2d[i][j] = array1[j][i];  
-        }
-      }
-      
       // Double for loop to draw
       for (let x = 0; x < array2d.length; x++) {
         for (let y = 0; y < array2d[x].length; y++) {
@@ -279,8 +269,37 @@
             cvs.fillStyle = "rgba(255, 255, 255)";
             cvs.fillRect(x, y, 1, 1);
           }
+          // every 10 pixels, across the x and y axis, draw the direction of the
+          // gradient vector for the given pixel
+          if ((x % 10 == 0) && (y % 10 == 0)) {
+            cvs.beginPath();
+            cvs.moveTo(x, y);
+            cvs.lineTo(x + (10 * flowField[x][y].x), y + (10 * flowField[x][y].y));
+            cvs.strokeStyle = 'red';
+            cvs.stroke();
+          }
         }
       }
+      // const rows = array1[0].length;
+      // const cols = array1.length;
+      // array2d = new Array(rows);
+
+      // for (let i = 0; i < rows; i++) {
+      //   array2d[i] = new Array(cols);
+      //   for (let j = 0; j < cols; j++) {
+      //     array2d[i][j] = array1[j][i];
+      //   }
+      // }
+
+      // // Double forloop to draw
+      // for (let x = 0; x < array2d.length; x++) {
+      //   for (let y = 0; y < array2d[0].length; y++) {
+      //     if (array2d[x][y] >= THRESHOLD) {
+      //       cvs.fillStyle = 'rgba(255, 255, 255)';
+      //       cvs.fillRect(x, y, 1, 1);
+      //     }
+      //   }
+      // }
     }
 
   </script>
