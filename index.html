@@ -18,33 +18,16 @@
 </style>
 
 <head>
+  <script src=helper/animate.js></script>
+  <script src=helper/drawmap.js></script>
+  <script src=helper/flowfield.js></script>
+  <script src=helper/mouse.js></script>
+  <script src=helper/particles.js></script>
+  <script src=helper/wallpoints.js></script>
   <script>
     var THRESHOLD = 0.005;
-    let canvas = document.getElementById("myCanvas");
-    let cvs = canvas.getContext("2d");
-    // let array1 = null;
     let array2d = null;
     let array3d = null;
-    let flowField = null; // Add this variable to store the generated flow field
-    let particles = []; // Array to store the particles
-
-    // click to create particles
-    let mouseDown = false;
-    let mouseprev = false;
-    let mouse = { x: undefined, y: undefined };
-
-    canvas.addEventListener('mousedown', function (event) {
-      mouseDown = true;
-    });
-
-    canvas.addEventListener('mouseup', function (event) {
-      mouseDown = false;
-    });
-
-    canvas.addEventListener('mousemove', function (event) {
-      mouse.x = event.clientX;
-      mouse.y = event.clientY
-    });
 
     window.onload = function () {
       // input distance field json file here
@@ -52,10 +35,6 @@
         .then(response => response.json())
         .then(data => {
           console.log("data: ", data);
-          // array2d = data;
-          // Set the canvas dimensions based on the size of the 2D array
-          // canvas.width = array2d[0].length;
-          // canvas.height = array2d.length;
           array2d = data;
           // Set the canvas dimensions based on the size of the 2D array
           canvas.width = array2d[0].length;
@@ -73,233 +52,6 @@
 
       // Call the animate function to start the animation loop
       animate();
-    }
-
-    function findNeighboringWallPoints(x, y) {
-      //checks eight directions
-      const neighbors = [
-        { x: x - 1, y: y },
-        { x: x + 1, y: y },
-        { x: x, y: y - 1 },
-        { x: x, y: y + 1 },
-        { x: x - 1, y: y - 1 },
-        { x: x + 1, y: y + 1 },
-        { x: x - 1, y: y + 1 },
-        { x: x + 1, y: y - 1 },
-      ];
-
-      const wallPoints = neighbors.filter(pt =>
-        pt.x >= 0 && pt.y >= 0 &&
-        pt.x < array2d.length &&
-        pt.y < array2d[0].length &&
-        array2d[pt.x][pt.y] < THRESHOLD
-      );
-
-      return wallPoints;
-    }
-
-    function createFlowField(threeDArray) {
-      const numRows = threeDArray.length;
-      const numCols = threeDArray[0].length;
-
-      const flowField = new Array(numRows);
-
-      for (let i = 0; i < numRows; i++) {
-        flowField[i] = new Array(numCols);
-      }
-
-      // Use the provided 3D array to set the vector values for each point in the flow field
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const x = threeDArray[i][j][0];
-          const y = threeDArray[i][j][1];
-          const velocity = { x: x, y: y };
-          flowField[i][j] = velocity;
-        }
-      }
-
-      return flowField;
-    }
-
-    function isInside(x, y) {
-      const xIndex = Math.min(Math.max(Math.floor(x * (array2d[0].length / canvas.width)), 0), array2d[0].length - 1);
-      const yIndex = Math.min(Math.max(Math.floor(y * (array2d.length / canvas.height)), 0), array2d.length - 1);
-      return (
-        array2d[xIndex][yIndex] >= THRESHOLD
-      );
-    }
-
-
-    // Define a Particle class
-    class Particle {
-      constructor(x, y, radius, color, velocityX, velocityY) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = {
-          x: velocityX,
-          y: velocityY,
-        };
-        this.outsideTime = 0;
-      }
-
-      draw() {
-        cvs.beginPath();
-        cvs.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        cvs.fillStyle = this.color;
-        cvs.fill();
-      }
-
-      update() {
-        this.draw();
-        let xIndex = Math.floor(this.x * (array2d[0].length / canvas.width));
-        let yIndex = Math.floor(this.y * (array2d.length / canvas.height));
-        xIndex = Math.max(0, Math.min(xIndex, flowField.length - 1));
-        yIndex = Math.max(0, Math.min(yIndex, flowField[0].length - 1));
-
-
-        // Change this value to adjust the influence of the flow field
-        const scale = 0.0001;
-        const flow = flowField[xIndex][yIndex];
-        this.velocity.x += flow.x * scale;
-        this.velocity.y += flow.y * scale;
-
-        if (!isInside(xIndex, yIndex)) {
-          console.log("collision");
-          this.outsideTime += 1 / 60; // Adjust the time
-          // Find the neighboring wall points
-          const wallPoints = findNeighboringWallPoints(xIndex, yIndex);
-          if (wallPoints.length < 2) {
-            // Not enough points to calculate a line, so just reverse direction
-            this.velocity.x *= -1;
-            this.velocity.y *= -1;
-          } else {
-            // Calculate the line between the first two wall points
-            const dx = wallPoints[1].x - wallPoints[0].x;
-            const dy = wallPoints[1].y - wallPoints[0].y;
-
-            // Calculate theta
-            const theta = Math.atan2(dy, dx);
-
-            // Calculate reflected velocity
-            const cos2Theta = Math.cos(2 * theta);
-            const sin2Theta = Math.sin(2 * theta);
-            const vx = this.velocity.x * cos2Theta + this.velocity.y * sin2Theta;
-            const vy = this.velocity.x * sin2Theta - this.velocity.y * cos2Theta;
-            this.velocity.x = vx;
-            this.velocity.y = vy;
-
-            // print the reflected angle
-            const reflectedAngle = Math.atan2(this.velocity.y, this.velocity.x) - Math.atan2(dy, dx);
-            console.log("reflected angle: ", reflectedAngle);
-          }
-        }
-
-
-
-        this.x += this.velocity.x;
-        this.y += this.velocity.y;
-
-        const speedLimit = 2; // Change this value to adjust the maximum speed
-        const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-        if (speed > speedLimit) {
-          this.velocity.x = (this.velocity.x / speed) * speedLimit;
-          this.velocity.y = (this.velocity.y / speed) * speedLimit;
-        }
-      }
-    }
-
-    // Animation loop
-    function animate() {
-      if (array2d != null && flowField != null) {
-        // if (array1 != null && flowField != null) {
-        requestAnimationFrame(animate);
-        cvs.clearRect(0, 0, canvas.width, canvas.height);
-        drawMap();
-        mouseClickGenerateParticles();
-
-        // Update particles
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].update();
-        }
-
-        // Filter particles to remove those that have been outside for more than 1 / 6 sec
-        particles = particles.filter(particle => particle.outsideTime <= 1 / 6);
-      } else {
-        requestAnimationFrame(animate);
-      }
-    }
-
-    function mouseClickGenerateParticles() {
-      // if mouse click in the line segment, create a burst of particles
-      if (mouseDown && !mouseprev) {
-        mouseprev = true;
-        console.log(mouse.x, mouse.y);
-        if (isInside(mouse.x, mouse.y)) {
-          for (let i = 0; i < 1; i++) {
-            let color =
-              "rgb(" +
-              Math.random() * 255 +
-              ", " +
-              Math.random() * 255 +
-              ", " +
-              Math.random() * 255 +
-              ")";
-            // Get the values of the velocity input fields
-            let velocityX = parseFloat(document.getElementById('velocityX').value);
-            let velocityY = parseFloat(document.getElementById('velocityY').value);
-
-            // Pass the velocity values as arguments when creating a new particle
-            particles.push(new Particle(mouse.x, mouse.y, 1, color, velocityX, velocityY));
-          }
-        }
-      } else if (!mouseDown && mouseprev) {
-        mouseprev = false;
-      }
-      // console.log(flowField[462][375][0]);
-    }
-
-    function drawMap() {
-      // Double for loop to draw
-      for (let x = 0; x < array2d.length; x++) {
-        for (let y = 0; y < array2d[x].length; y++) {
-          if (array2d[x][y] >= THRESHOLD) {
-            // Draw the rectangle
-            cvs.fillStyle = "rgba(255, 255, 255)";
-            cvs.fillRect(x, y, 1, 1);
-          }
-          // every 10 pixels, across the x and y axis, draw the direction of the
-          // gradient vector for the given pixel
-          if ((x % 10 == 0) && (y % 10 == 0)) {
-            cvs.beginPath();
-            cvs.moveTo(x, y);
-            cvs.lineTo(x + (10 * flowField[x][y].x), y + (10 * flowField[x][y].y));
-            cvs.strokeStyle = 'red';
-            cvs.stroke();
-          }
-        }
-      }
-      // const rows = array1[0].length;
-      // const cols = array1.length;
-      // array2d = new Array(rows);
-
-      // for (let i = 0; i < rows; i++) {
-      //   array2d[i] = new Array(cols);
-      //   for (let j = 0; j < cols; j++) {
-      //     array2d[i][j] = array1[j][i];
-      //   }
-      // }
-
-      // // Double forloop to draw
-      // for (let x = 0; x < array2d.length; x++) {
-      //   for (let y = 0; y < array2d[0].length; y++) {
-      //     if (array2d[x][y] >= THRESHOLD) {
-      //       cvs.fillStyle = 'rgba(255, 255, 255)';
-      //       cvs.fillRect(x, y, 1, 1);
-      //     }
-      //   }
-      // }
     }
 
   </script>
