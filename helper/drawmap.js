@@ -16,6 +16,7 @@ function drawMap() {
                 cvs.strokeStyle = 'red';
                 cvs.stroke();
             }
+
         }
     }
 }
