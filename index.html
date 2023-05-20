@@ -6,6 +6,8 @@
   <label for="velocityY">Velocity Y:</label><br>
   <input type="number" id="velocityY" name="velocityY" value="0.25"><br>
   <button id="setVelocity">Set Velocity</button>
+  <label for="gradientVectors">Gradient Vectors:</label>
+  <input type="checkbox" id="gradientVectors" name="gradientVectors" checked>
 </div>
 <style>
   body {
@@ -24,6 +26,7 @@
   <script src=helper/mouse.js></script>
   <script src=helper/particles.js></script>
   <script src=helper/wallpoints.js></script>
+  <script src=helper/switch.js></script>
   <script>
     var THRESHOLD = 0.005;
     let array2d = null;
