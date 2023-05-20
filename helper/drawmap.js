@@ -9,13 +9,14 @@ function drawMap() {
             }
             // every 10 pixels, across the x and y axis, draw the direction of the
             // gradient vector for the given pixel
-            if ((x % 10 == 0) && (y % 10 == 0)) {
+            if (showVectors && (x % 10 == 0) && (y % 10 == 0)) {
                 cvs.beginPath();
                 cvs.moveTo(x, y);
                 cvs.lineTo(x + (10 * flowField[x][y].x), y + (10 * flowField[x][y].y));
                 cvs.strokeStyle = 'red';
                 cvs.stroke();
             }
+
         }
     }
 }

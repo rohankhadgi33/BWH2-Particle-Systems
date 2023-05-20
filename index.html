@@ -5,7 +5,11 @@
   <input type="number" id="velocityX" name="velocityX" value="0.25"><br>
   <label for="velocityY">Velocity Y:</label><br>
   <input type="number" id="velocityY" name="velocityY" value="0.25"><br>
-  <button id="setVelocity">Set Velocity</button>
+  <button id="setVelocity">Set Velocity</button><br>
+  <label for="gradientVectors">Gradient Vectors:</label>
+  <input type="checkbox" id="gradientVectors" name="gradientVectors"><br>
+  <label for="demoMode">Demo Mode:</label>
+  <input type="checkbox" id="demoMode" name="demoMode">
 </div>
 <style>
   body {
@@ -24,36 +28,39 @@
   <script src=helper/mouse.js></script>
   <script src=helper/particles.js></script>
   <script src=helper/wallpoints.js></script>
+  <script src=helper/switch.js></script>
+  <script src=helper/demoswitch.js></script>
   <script>
     var THRESHOLD = 0.005;
     let array2d = null;
     let array3d = null;
 
     window.onload = function () {
-      // input distance field json file here
       fetch('distance_field.json')
         .then(response => response.json())
         .then(data => {
           console.log("data: ", data);
           array2d = data;
-          // Set the canvas dimensions based on the size of the 2D array
+          array1 = data;
           canvas.width = array2d[0].length;
           canvas.height = array2d.length;
+        })
+        .then(() => {
+          fetch('gradient.json')
+            .then(response => response.json())
+            .then(data => {
+              console.log("3dArray: ", data);
+              array3d = data;
+              flowField = createFlowField(array3d); // Initialize the flow field
+            });
+        })
+        .then(() => {
+          animate();
+        })
+        .catch(error => {
+          console.error('Error:', error);
         });
-
-      // input gradient vectors json file here
-      fetch('gradient.json')
-        .then(response => response.json())
-        .then(data => {
-          console.log("3dArray: ", data);
-          array3d = data;
-          flowField = createFlowField(array3d); // Initialize the flow field
-        });
-
-      // Call the animate function to start the animation loop
-      animate();
     }
-
   </script>
 </head>
 
